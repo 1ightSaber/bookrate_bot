@@ -1,0 +1,8 @@
+venv/*
+.idea
+.ipynb_checkpoints
+./pychache
+__pycache__/*
+bookrate_db
+Untitled.ipynb
+token.txt
