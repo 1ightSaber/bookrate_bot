@@ -3,6 +3,6 @@ venv/*
 .ipynb_checkpoints
 ./pychache
 __pycache__/*
-bookrate_db
+bookrate.db
 Untitled.ipynb
 token.txt

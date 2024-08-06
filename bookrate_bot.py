@@ -9,6 +9,7 @@ from helpers import (
     build_start_keyboard,
     build_book_keyboard,
     build_year_keyboard,
+    build_admin_keyboard,
     BUTTON_CANCEL
 )
 
@@ -32,6 +33,17 @@ class CancellableScene(Scene):
     @on.message(F.text.casefold() == BUTTON_CANCEL.text.casefold(), after=After.exit())
     async def handle_cancel(self, message: Message):
         await message.answer("Скасовано.", reply_markup=ReplyKeyboardRemove())
+
+
+class AddDeleteScene(CancellableScene, state="admin"):
+    """
+    У цій сцені обробляється процес додавання або видалення книг із бази даних для адміністратора
+    Крок №0 - Запитуємо, що хотіли б зробити - додати або видалити
+    Крок №1 - Запитуємо назву книги
+    Крок №2 - Запитуємо рік прочитання книги
+    Крок №3 - Додаємо або видаляємо книгу та повідомляємо про успішну дію
+    """
+    pass
 
 
 class RateScene(CancellableScene, state="rate"):
@@ -61,7 +73,7 @@ class RateScene(CancellableScene, state="rate"):
                 if int(message.text) > 2020:
                     await state.update_data(step=data.get('step') + 1)
                     await message.answer("Яку книгу ви б хотіли оцінити?",
-                                         reply_markup=build_book_keyboard(db.get_books_on_year(message.text)))
+                                         reply_markup=build_book_keyboard(db.get_books_on_year(int(message.text))))
                 else:
                     await message.answer(f"Введіть рік між 2021 та {datetime.now().year}")
             elif current_step == 2:  # Запитуємо, яку оцінку поставити
@@ -108,17 +120,14 @@ class AvgScene(CancellableScene, state="avg"):
 
     @on.message(F.text)
     async def on_message(self, message: Message, state: FSMContext):
-        #logging.log(level=logging.DEBUG, msg=f"User is on {await state.get_state()}")
         data = await state.get_data()
         current_step = data.get('step')
-
         try:
-            #logging.log(level=logging.DEBUG, msg=f"Message from user: '{message.text}'")
             if current_step == 1:  # Обираємо книгу
                 if int(message.text) > 2020:
                     await state.update_data(step=data.get('step') + 1)
                     await message.answer("Оцінку якої книги Ви б хотіли переглянути?",
-                                         reply_markup=build_book_keyboard(db.get_books_on_year(message.text)))
+                                         reply_markup=build_book_keyboard(db.get_books_on_year(int(message.text))))
                 else:
                     await message.answer(f"Введіть рік між 2021 та {datetime.now().year}")
             elif current_step == 2:  # Виводимо оцінку
@@ -163,6 +172,11 @@ class DefaultScene(
         await callback_query.answer(cache_time=0)
         await callback_query.message.delete_reply_markup()
 
+    @on.callback_query(F.data == "admin", after=After.goto(AddDeleteScene))
+    async def add_delete_callback(self, callback_query: CallbackQuery):
+        await callback_query.answer(cache_time=0)
+        await callback_query.message.delete_reply_markup()
+
 
 def create_dispatcher() -> Dispatcher:
     dispatcher = Dispatcher()
@@ -172,6 +186,7 @@ def create_dispatcher() -> Dispatcher:
         DefaultScene,
         AvgScene,
         RateScene,
+        AddDeleteScene,
     )
 
     return dispatcher
