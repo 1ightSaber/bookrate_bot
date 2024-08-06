@@ -11,6 +11,8 @@ Bookrate is a Telegram bot designed to provide a simple interface for users to r
 ## Data Storage
 Data in Bookrate is stored as follows:
 - Data Flow Diagram:
-  ![Data Flow Diagram](visualization/boookrate_bot.png)
+
+![Data Flow Diagram](visualization/bookrate_bot.png)
 - Database Visualization:
-  ![Database Visualization](visualization/bookrate_db.png)
+
+![Database Visualization](visualization/bookrate_db.png)
